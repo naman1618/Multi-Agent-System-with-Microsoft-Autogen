@@ -1,0 +1,143 @@
+import json
+import os
+import logging
+import PyPDF2
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import PyPDFLoader
+from langchain.memory import ConversationBufferMemory
+from langchain.llms import OpenAI
+from langchain.chains import ConversationalRetrievalChain
+import autogen
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Load and Filter Configuration List
+def config_list_from_json(file_path, filter_dict):
+    with open(file_path, 'r') as file:
+        try:
+            config_data = json.load(file)
+            config_list = config_data.get("models", [])
+            if not isinstance(config_list, list):
+                raise ValueError("The 'models' key does not contain a list.")
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding JSON: {e}")
+            raise
+
+    filtered_list = [
+        config for config in config_list
+        if isinstance(config, dict) and all(config.get(key) in values for key, values in filter_dict.items())
+    ]
+
+    return filtered_list
+
+OAI_CONFIG_LIST = "your-config-path"
+
+config_list = config_list_from_json(
+    OAI_CONFIG_LIST,
+    filter_dict={
+        "model": ["gpt-4o"],
+    },
+)
+
+if config_list:
+    gpt4_api_key = config_list[0]["api_key"]
+    os.environ['OPENAI_API_KEY'] = gpt4_api_key
+    logger.info("API key set in environment.")
+
+# Load and Split Documents with Error Handling
+pdf_directory = 'your-dir-path'
+pdf_files = [os.path.join(pdf_directory, f) for f in os.listdir(pdf_directory) if f.endswith('.pdf')]
+
+loaders = []
+for file_path in pdf_files:
+    try:
+        loaders.append(PyPDFLoader(file_path))
+    except Exception as e:
+        logger.error(f"Error loading {file_path}: {e}")
+
+docs = []
+for loader in loaders:
+    try:
+        docs.extend(loader.load())
+    except Exception as e:
+        logger.error(f"Error processing loader {loader}: {e}")
+
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000)
+docs = text_splitter.split_documents(docs)
+
+logger.info(f"Documents loaded and split: {len(docs)}")
+
+vectorstore = Chroma(
+    collection_name="full_documents",
+    embedding_function=OpenAIEmbeddings()
+)
+vectorstore.add_documents(docs)
+
+qa = ConversationalRetrievalChain.from_llm(
+    OpenAI(temperature=0),
+    vectorstore.as_retriever(),
+    memory=ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+)
+
+# Define the QA Function
+def answer_resume_question(question):
+    response = qa({"question": question})
+    logger.info(f"QA Function Response: {response}")  # Debug print
+    return response["answer"]
+
+llm_config = {
+    "seed": 42,
+    "config_list": config_list,
+    "temperature": 0.9,
+    "functions": [
+        {
+            "name": "answer_resume_question",
+            "description": "Answer any resume related questions",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The question to ask in relation to the resumes",
+                    }
+                },
+                "required": ["question"],
+            },
+        }
+    ],
+}
+
+os.environ["AUTOGEN_USE_DOCKER"] = "False"
+
+# Create Assistant and User Proxy Agents
+assistant = autogen.AssistantAgent(
+    name="assistant",
+    llm_config=llm_config,
+)
+
+user_proxy = autogen.UserProxyAgent(
+    name="user_proxy",
+    human_input_mode="NEVER",
+    max_consecutive_auto_reply=10,
+    code_execution_config={"work_dir": "."},
+    llm_config=llm_config,
+    system_message="""Reply TERMINATE if the task has been solved to full satisfaction.
+Otherwise, reply CONTINUE, or explain why the task is not solved yet.""",
+    function_map={"answer_resume_question": answer_resume_question}
+)
+
+# Initiate Chat
+user_proxy.initiate_chat(
+    assistant,
+    message="""
+Find the answers to the 2 questions below and write an introduction based on them.
+1. example question
+2. example question
+
+Start the work now.
+"""
+)
