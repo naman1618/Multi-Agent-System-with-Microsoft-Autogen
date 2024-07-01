@@ -1,0 +1,8 @@
+{
+    "models": [
+        {
+            "model": "gpt-4o",
+            "api_key": "sk-proj-KCHEnl7mrxxsOc9GfVfLT3BlbkFJ5GVdyifopAyYM2LSRFhJ"
+        }
+    ]
+}
