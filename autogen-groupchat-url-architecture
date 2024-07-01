@@ -2,7 +2,6 @@ import chromadb
 import autogen
 from autogen import AssistantAgent
 from autogen.agentchat.contrib.retrieve_user_proxy_agent import RetrieveUserProxyAgent
-import json
 
 # Load config list
 with open("OAI_CONFIG_LIST", "r") as file:
@@ -84,9 +83,6 @@ def _reset_agents():
     reviewer.reset()
 
 def print_conversation(messages):
-    # Print the structure of the first message for debugging
-    if messages:
-        print(f"Message structure: {messages[0]}")
     for message in messages:
         speaker = message.get('speaker', 'Unknown')
         content = message.get('content', '')
