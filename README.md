@@ -1,6 +1,6 @@
 # **Autogen Multi-Agent Framework: Customizable AI Teams for Any Use Case**
 
-This repository demonstrates how to create **custom multi-agent systems** using **Autogen**. The scripts provided here allow agents to interact, collaborate, and solve complex tasks such as **document retrieval**, **code generation**, and **retrieval-augmented generation (RAG)** processes. The system's flexibility enables you to create and configure specialized teams for **DevOps**, **creative content generation**, **AI-driven writing teams**, and more. With additional capabilities, these agents can even be used to **generate images** or **assist in decision-making**.
+This repository demonstrates how to create **custom multi-agent systems** using **Autogen**. The scripts allow agents to interact, collaborate, and solve tasks such as **document retrieval**, **code generation**, and **image/video generation**. The system's flexibility enables you to create teams tailored for **DevOps**, **creative content generation**, **AI-driven writing teams**, and more. These teams can easily integrate **image generation** models like **DALL-E 3** or video generation capabilities.
 
 ## **Table of Contents**
 1. [Overview](#overview)
@@ -9,108 +9,96 @@ This repository demonstrates how to create **custom multi-agent systems** using 
 4. [Usage](#usage)
     - [Creating Agents](#creating-agents)
     - [Running Conversations](#running-conversations)
-5. [Customization](#customization)
-6. [Use Cases](#use-cases)
-7. [Future Enhancements](#future-enhancements)
-8. [Contributing](#contributing)
-9. [License](#license)
+5. [Image and Video Generation](#image-and-video-generation)
+6. [Customization](#customization)
+7. [Use Cases](#use-cases)
+8. [Future Enhancements](#future-enhancements)
+9. [Contributing](#contributing)
+10. [License](#license)
 
 ## **Overview**
-This project leverages **Autogen** to build highly customizable **AI agents** that can be configured to handle a wide range of tasks. The agents collaborate to provide **automated solutions**, **retrieval-augmented generation**, and **code execution**. Moreover, these agents can be specialized to form various types of teams, such as:
-
-- **DevOps teams**: Automate deployments, monitor systems, and handle infrastructure.
-- **Creative teams**: Generate content, produce images, and design creative assets.
-- **Writing teams**: Automate scriptwriting, article creation, and creative storytelling.
-- **Marketing teams**: Perform customer segmentation, generate marketing content, and strategize campaigns.
-
-The flexibility of these agents means they can be adapted to work in almost any domain, depending on the requirements and the integrations you build.
+This project leverages **Autogen** to build highly customizable **AI agents** that can be adapted to various tasks. In addition to tasks like document retrieval and code generation, this framework can also integrate **image** and **video generation** models such as **DALL-E 3**. These agents can be customized to form teams for **DevOps**, **creative content generation**, or **marketing**, depending on your use case.
 
 ## **Features**
-- **Conversational Agents**: Multi-agent systems that interact and solve complex tasks collaboratively.
-- **Customizable Agent Configurations**: Easily set up agents to serve different functions, whether it's DevOps, creative writing, or technical problem-solving.
-- **Retrieval-Augmented Generation (RAG)**: Use documents or knowledge bases as part of the agent's workflow.
-- **Error-Handling and Resilience**: Agents handle errors gracefully, allowing robust conversation and task-solving capabilities.
-- **Code Execution Capabilities**: Agents can write, run, and debug code collaboratively.
+- **Customizable Agent Configurations**: Easily set up agents for tasks such as **DevOps**, **image creation**, or **content generation**.
+- **Image & Video Generation**: Use models like **DALL-E 3** for image creation or integrate other models for video generation.
+- **Interchangeable Models**: Support for swapping out models for image, video, or text-based tasks.
+- **Code Execution Capabilities**: Agents can generate, run, and debug code collaboratively.
 
-## **Setup Instructions**
+## **Image and Video Generation**
 
-### **Prerequisites**
-- **Python 3.8+**
-- **OpenAI API Key** (for LLM and embedding functions)
-- **Autogen** (install via pip)
-- **Chroma** (for vector storage and document retrieval)
-- **Docker** (optional, if using Docker-based agents)
+This framework supports **image** and **video generation** through models like **DALL-E 3** or any other similar models, allowing you to build creative teams that can produce both visual and video content. You can easily configure the framework to add **DALL-E 3** or any other image generation model by updating the **OAI config list**.
 
-### **Installation**
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/naman1618/autogen-multi-agent-system.git
-   cd autogen-multi-agent-system
-   ```
+### **Adding DALL-E 3 to the OAI Config List**
+To add **DALL-E 3** to the list of models in the configuration, simply update the `config_list_from_json` to include DALL-E 3 alongside GPT-4 or any other model:
 
-2. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Set up your environment variables:
-   ```bash
-   export OPENAI_API_KEY="your-api-key-here"
-   ```
-
-## **Usage**
-
-### **Creating Agents**
-The provided scripts allow you to create a range of agents. For example, the `boss` agent acts as a task assigner, and the `coder` agent generates Python code. You can also configure specialized agents for content creation, code review, or marketing.
-
-### **Running Conversations**
-You can initiate conversations between agents using the provided functions. For example, use the `norag_chat()` or `rag_chat()` functions to start a conversation.
-
-```python
-from your_script import norag_chat, rag_chat
-
-norag_chat()  # Start a basic conversation
-rag_chat()    # Start a retrieval-augmented conversation
+```json
+{
+    "models": [
+        {
+            "model": "gpt-4o",
+            "api_key": "your_gpt4_api_key"
+        },
+        {
+            "model": "dall-e-3",
+            "api_key": "your_dalle3_api_key"
+        }
+    ]
+}
 ```
 
-You can also configure the agents for more complex interactions using the `function_calling_rag_chat()` function.
+This configuration allows you to use **DALL-E 3** for **image generation** by referencing it in the agent functions. The same structure can be used for **video generation** by integrating other video generation models (e.g., **RunwayML**, **DeepMind's Dreamer**).
 
-## **Customization**
-
-### **Creating New Agents**
-The agents are flexible and can be customized to solve domain-specific tasks. Whether you're looking to build a DevOps team to automate deployments or a marketing team to generate content, you can easily modify the agent configurations. Here's an example of how you can define a **creative content generation agent**:
+### **Using Image/Video Generation in the System**
+Once the models are added to the configuration, you can use them within the agent system to generate images or videos. Here's an example of how you can configure an agent for **image generation** using DALL-E 3:
 
 ```python
-from autogen import AssistantAgent
+from openai import Image
 
-creative_agent = AssistantAgent(
-    name="Creative_Content_Generator",
-    system_message="You are a creative content generator, focused on creating captivating stories, blogs, and image descriptions."
-)
-```
-
-### **Integrating Image Generation**
-This framework can be extended to include **image generation capabilities** using tools like **DALL-E** or **Stable Diffusion**. By integrating these tools, your agents can generate images on the fly based on textual descriptions.
-
-```python
-from your_image_generation_script import generate_image
+def generate_image(prompt):
+    response = Image.create(prompt=prompt, model="dall-e-3")
+    return response["data"][0]["url"]
 
 def image_generation_agent(description):
     return generate_image(description)  # Function to generate an image from text
 ```
 
+### **Video Generation**
+You can follow a similar approach for video generation. For example, if you are using **RunwayML** or another video generation model, you can add its API details to the `config_list` and create agents that handle video generation:
+
+```python
+def generate_video(prompt):
+    # Example function for video generation using RunwayML API or other services
+    response = RunwayML.create_video(prompt=prompt)
+    return response["video_url"]
+
+def video_generation_agent(description):
+    return generate_video(description)
+```
+
+Both **image** and **video generation** can be easily integrated into the agent framework, allowing for a broad range of creative outputs.
+
+## **Customization**
+
+The agents are highly customizable. Depending on the use case, you can create agents that focus on:
+
+- **DevOps Tasks**: Automate infrastructure deployments, monitor systems, and perform CI/CD.
+- **Creative Teams**: Use agents to generate **images**, **videos**, **stories**, and other creative content.
+- **Marketing & Writing Teams**: Create personalized marketing content, write blogs, or produce marketing strategies.
+
+To switch models, you only need to modify the configuration list to include the models you want to use for different tasks (text, image, or video).
+
 ## **Use Cases**
 
-1. **DevOps Automation**: Agents can be configured to manage infrastructure, monitor systems, and handle continuous integration/deployment (CI/CD) pipelines.
-2. **Creative Teams**: Use agents to generate creative content, such as articles, images, or social media posts.
-3. **AI-Driven Writing Teams**: Automate writing tasks like scriptwriting or copywriting.
-4. **Marketing Teams**: Agents can handle customer segmentation, marketing content generation, and campaign strategy.
-5. **Software Engineering Teams**: Automate code reviews, debugging, and collaborative code generation.
+1. **Creative Teams**: Generate images and videos for marketing or social media using **DALL-E 3** or other models.
+2. **DevOps Teams**: Automate CI/CD pipelines, monitor server health, and manage infrastructure through collaborative agents.
+3. **Marketing Content**: Use agents to create marketing campaigns, segment customers, and generate social media posts with both **text** and **image** content.
+4. **Writing and Blogging Teams**: Automate article and scriptwriting, including SEO optimization and blog generation.
 
 ## **Future Enhancements**
-1. **Integration with More AI Models**: Expanding the available models for specialized tasks like image generation or reinforcement learning.
-2. **Dynamic Agent Roles**: Allowing agents to adapt to changing project requirements in real time.
-3. **Improved Memory and Context Handling**: Adding more advanced memory functions so that agents retain information between tasks or conversations.
+1. **Integrating More Models**: Expand support for additional image and video generation models.
+2. **Advanced Context Handling**: Enhance agent memory and context retention for long-running conversations.
+3. **Dynamic Agent Roles**: Enable agents to switch between tasks dynamically based on project needs.
 
 ## **Contributing**
 Feel free to open an issue or submit a pull request if you have ideas to improve this project. Contributions are always welcome!
@@ -120,8 +108,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
 
 ---
 
-By following this guide, you can configure and extend the **Autogen multi-agent system** to suit your specific use case, whether you're creating a **DevOps team**, **creative team**, or **AI-powered problem-solving agents**. The adaptability of these agents opens up possibilities in nearly every domain!
-
----
-
-Let me know if you'd like any additional tweaks or specific points emphasized in this README!
+This **README.md** gives a clear and flexible overview of how to incorporate **DALL-E 3**, other image/video generation models, and customize the agents to fit various use cases. Let me know if you'd like further changes!
