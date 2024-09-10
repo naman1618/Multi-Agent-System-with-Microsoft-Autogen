@@ -1,5 +1,4 @@
-# **Autogen Multi-Agent Framework: 
-# **Customizable AI Teams for Any Use Case**
+# **Autogen Multi-Agent Framework:Customizable AI Teams for Any Use Case**
 
 This repository demonstrates how to create **custom multi-agent systems** using **Autogen**. The scripts provided here allow agents to interact, collaborate, and solve complex tasks such as **document retrieval**, **code generation**, and **retrieval-augmented generation (RAG)** processes. The system's flexibility enables you to create and configure specialized teams for **DevOps**, **creative content generation**, **AI-driven writing teams**, and more. With additional capabilities, these agents can even be used to **generate images** or **assist in decision-making**.
 
