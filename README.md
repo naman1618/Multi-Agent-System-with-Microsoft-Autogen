@@ -1,4 +1,4 @@
-# Joyful Jobs RAG Architecture
+# Multi Agent Autogen RAG Architecture
 
 This project implements a Retrieval-Augmented Generation (RAG) architecture using OpenAI's language models and Chroma vector store for document retrieval. It provides a chatbot interface for interacting with the system and also demonstrates the use of the AutoGen library for creating intelligent agents.
 
